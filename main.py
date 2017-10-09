@@ -24,11 +24,12 @@ if __name__ == "__main__":
         json.dump(settings, open("settings.json","w"))
 
     root = tk.Tk()
+    root.attributes("-fullscreen", True)
 
     width = 800
     height = 400
 
-    size = width, height
+    size = width, height-60
     outfile = os.path.splitext(infile)[0] + ".thumbnail"
     if infile != outfile:
         try:
@@ -40,7 +41,6 @@ if __name__ == "__main__":
     tkimage = ImageTk.PhotoImage(img)
 
     root.geometry('{}x{}'.format(width, height+20))
-    gamelabel = tk.Label(root, text=gotw).pack()
+    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44)).pack()
     tk.Label(root, image=tkimage).pack()
-
     root.mainloop()
