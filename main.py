@@ -41,6 +41,7 @@ if __name__ == "__main__":
     tkimage = ImageTk.PhotoImage(img)
 
     root.geometry('{}x{}'.format(width, height+20))
-    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44)).pack()
+    game_of_the_week_label = tk.Label(root, text="Game of the week:", font=("Courier", 44)).pack()
     tk.Label(root, image=tkimage).pack()
+    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44)).pack()
     root.mainloop()
