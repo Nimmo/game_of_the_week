@@ -25,6 +25,8 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     root.attributes("-fullscreen", True)
+    root.title("Game of the week")
+    root.configure(bg="black")
 
     width = 800
     height = 400
@@ -41,7 +43,7 @@ if __name__ == "__main__":
     tkimage = ImageTk.PhotoImage(img)
 
     root.geometry('{}x{}'.format(width, height+20))
-    game_of_the_week_label = tk.Label(root, text="Game of the week:", font=("Courier", 44)).pack()
+    game_of_the_week_label = tk.Label(root, text="Game of the week:", font=("Courier", 44), bg="black", fg="white").pack()
     tk.Label(root, image=tkimage).pack()
-    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44)).pack()
+    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44), bg="black", fg="white").pack()
     root.mainloop()
