@@ -1,5 +1,8 @@
 from PIL import Image, ImageTk
+
+# Required for video support
 import imageio
+
 import tkinter as tk, threading
 import os
 import json
@@ -14,24 +17,16 @@ def stream(label):
         label.image = frame_image
 
         
-def prepare_file(infile, size):
+def get_filetype(infile):
     image_types = ["png", "jpg"]
+    video_types = ["mov"]
     filetype = infile.split(".")[-1]
     if filetype in image_types:
         filetype = "image"
-        outfile = os.path.splitext(infile)[0] + ".thumbnail"
-        if infile != outfile:
-            try:
-                img = Image.open(infile)
-                img.thumbnail(size, Image.ANTIALIAS)
-            except IOError:
-                print("cannot create thumbnail for '%s'" % infile)
-                sys.exit()
-    else:
+    elif filetype in video_types:
         filetype = "video"
-        img = infile            
 
-    return img, filetype
+    return filetype
 
 if __name__ == "__main__":
     try:
@@ -40,7 +35,7 @@ if __name__ == "__main__":
         ssotw = settings["ssotw"]
         image_directory = "images"
         try:
-            infile = os.path.join(image_directory, ssotw)
+            screenshot_file = os.path.join(image_directory, ssotw)
         except IOError:
             print("Screenshot not found, recreating settings file.")
             raise IOError
@@ -63,23 +58,36 @@ if __name__ == "__main__":
 
     size = width, height-60
     
-    screenshot, filetype = prepare_file(infile, size)    
+    file_type = get_filetype(screenshot_file)
 
     root.geometry('{}x{}'.format(width, height+20))
     game_of_the_week_label = tk.Label(root, text="Game of the week:", font=("Courier", 44), bg="black", fg="white").pack()
 
-    if filetype == "image":
-        tkscreenshot = ImageTk.PhotoImage(screenshot)
-        tk.Label(root, image=tkscreenshot).pack()
+    if file_type == "image":
+        try:
+            img = Image.open(screenshot_file)
+            img.thumbnail(size, Image.ANTIALIAS)
+        except IOError:
+            print("cannot create thumbnail for '%s'" % screenshot_file)
+            sys.exit()
+        image_container = ImageTk.PhotoImage(img)
+        tk.Label(root, image=image_container).pack()
+    elif file_type == "video":
+        try:
+            video = imageio.get_reader(screenshot_file)
+        except imageio.core.fetching.NeedDownloadError:
+            imageio.plugins.ffmpeg.download()
+            video = imageio.get_reader(screenshot_file)
+        except OSError:
+            print("It looks as though some OS permissions are preventing you from creating a thread to handle the video")
+            video = None
+        if video is not None:
+            video_container = tk.Label(root)
+            video_container.pack()
+            thread = threading.Thread(target=stream, args=(video_container,))
+            thread.daemon = 1
+            thread.start()
     else:
-        video = imageio.get_reader(screenshot)
-        my_label = tk.Label(root)
-        my_label.pack()
-        thread = threading.Thread(target=stream, args=(my_label,))
-        thread.daemon = 1
-        thread.start()
-
-    
-    
-    gamelabel = tk.Label(root, text=gotw, font=("Courier", 44), bg="black", fg="white").pack()
+        print("There currently isn't support for files of type", file_type + ", raise an issue on github if you feel that it should be supported.")
+    game_label = tk.Label(root, text=gotw, font=("Courier", 44), bg="black", fg="white").pack()
     root.mainloop()
